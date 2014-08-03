@@ -30,8 +30,8 @@ static void onLine(dyad_Event *e) {
   if (!memcmp(e->data, "PING", 4)) {
     dyad_writef(e->stream, "PONG%s\r\n", e->data + 4);
   }
-  /* Handle registering */
-  if (!isRegistered && strstr(e->data, "Welcome")) {
+  /* Handle RPL_WELCOME */
+  if (!isRegistered && strstr(e->data, "001")) {
     /* Join channel */
     dyad_writef(e->stream, "JOIN %s\r\n", channel);
     isRegistered = 1;

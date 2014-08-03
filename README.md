@@ -18,6 +18,7 @@ Usage examples can be found at [example/](example/).
 ## Server example
 A simple server which listens on port 8000 and echoes whatever is sent to it:
 ```c
+#include <stdlib.h>
 #include "dyad.h"
 
 static void onData(dyad_Event *e) {

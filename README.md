@@ -2,8 +2,8 @@
 ![Header Image](https://cloud.githubusercontent.com/assets/3920290/3791159/d5ebd230-1b2b-11e4-89fd-8650d7a60442.png)
 
 ## Overview
-Dyad is an asynchronous networking library which aims to be lightweight,
-portable and easy to use. Dyad can be used both to create small standalone
+Dyad.c is an asynchronous networking library which aims to be lightweight,
+portable and easy to use. It can be used both to create small standalone
 servers and to provide network support to existing projects.
 
 ## Getting started

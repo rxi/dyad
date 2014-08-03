@@ -3,7 +3,10 @@
 #include <string.h>
 #include "dyad.h"
 
-/* A very simple HTTP server */
+/* A very simple HTTP server. See httpserv2.c for an example which uses
+ * DYAD_EVENT_READY and udata to send the requested file in chunks rather than
+ * loading the entire file into a stream's write buffer. */
+ 
 
 static void onLine(dyad_Event *e) {
   char path[128];

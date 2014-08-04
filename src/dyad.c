@@ -13,6 +13,9 @@
   #include <windows.h>
 #else
   #define _POSIX_C_SOURCE 200809L
+  #ifdef __APPLE__
+    #define _DARWIN_UNLIMITED_SELECT
+  #endif
   #include <unistd.h>
   #include <netdb.h>
   #include <fcntl.h>

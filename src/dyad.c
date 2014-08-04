@@ -141,11 +141,12 @@ static void dyad_vectorSplice(
     (v)->length -= (count) )
 
 
+
 /*===========================================================================*/
-/* FdSet                                                                     */
+/* SelectSet                                                                 */
 /*===========================================================================*/
 
-/* A wrapper around fd_set for use with select(). The FdSet's underlying fd_set
+/* A wrapper around the three fd_sets used for select(). The fd_sets' allocated
  * memory is automatically expanded to accommodate fds as they are added.
  *
  * On Windows fd_sets are implemented as arrays; the FD_xxx macros are not used
@@ -156,78 +157,97 @@ static void dyad_vectorSplice(
  *
  * On non-Windows platforms the sets are assumed to be bit arrays. The FD_xxx
  * macros are not used in case their implementation attempts to do bounds
- * checking; instead we manipulate the fd_set's bits directly.
+ * checking; instead we manipulate the fd_sets' bits directly.
  */
+
+enum {
+  DYAD_SET_READ,
+  DYAD_SET_WRITE,
+  DYAD_SET_EXCEPT,
+  DYAD_SET_MAX
+};
+
+typedef struct {
+  int capacity, maxfd;
+  fd_set *fds[DYAD_SET_MAX];
+} dyad_SelectSet;
 
 #define DYAD_UNSIGNED_BIT (sizeof(unsigned) * CHAR_BIT)
 
-typedef struct {
-  dyad_Vector(fd_set) vec;
-} dyad_FdSet;
 
-
-static void dyad_fdsDeinit(dyad_FdSet *fds) {
-  dyad_vectorDeinit(&fds->vec);
-}
-
-
-static fd_set *dyad_fdsGetFdSet(dyad_FdSet *fds) {
-  return fds->vec.data;
-}
-
-
-static void dyad_fdsGrow(dyad_FdSet *fds) {
-  fd_set s;
-  memset(&s, 0, sizeof(s));
-  dyad_vectorPush(&fds->vec, s);
-}
-
-
-static void dyad_fdsZero(dyad_FdSet *fds) {
-#if _WIN32
-  fd_set *s = fds->vec.data;
-  if (s) s->fd_count = 0;
-#else
-  memset(fds->vec.data, 0, fds->vec.length * sizeof(*fds->vec.data)); 
-#endif
-}
-
-
-static void dyad_fdsSet(dyad_FdSet *fds, int fd) {
-#ifdef _WIN32
-  fd_set *s;
-  unsigned max = (unsigned) fds->vec.length * FD_SETSIZE;
-  if (!fds->vec.data || max < fds->vec.data->fd_count + 1) {
-    dyad_fdsGrow(fds);
+static void dyad_selectDeinit(dyad_SelectSet *s) {
+  int i;
+  for (i = 0; i < DYAD_SET_MAX; i++) {
+    dyad_free(s->fds[i]);
+    s->fds[i] = NULL;
   }
-  s = fds->vec.data;
-  s->fd_array[s->fd_count++] = (SOCKET) fd;
+  s->capacity = 0;
+}
+
+
+static void dyad_selectGrow(dyad_SelectSet *s) {
+  int i;
+  int oldCapacity = s->capacity;
+  s->capacity = s->capacity ? s->capacity << 1 : 1;
+  for (i = 0; i < DYAD_SET_MAX; i++) {
+    s->fds[i] = dyad_realloc(s->fds[i], s->capacity * sizeof(fd_set));
+    memset(s->fds[i] + oldCapacity, 0,
+           (s->capacity - oldCapacity) * sizeof(fd_set));
+  }
+}
+
+
+static void dyad_selectZero(dyad_SelectSet *s) {
+  int i;
+  if (s->capacity == 0) return;
+  s->maxfd = 0;
+  for (i = 0; i < DYAD_SET_MAX; i++) {
+#if _WIN32
+    s->fds[i]->fd_count = 0;
+#else
+    memset(s->fds[i], 0, s->capacity * sizeof(fd_set));
+#endif
+  }
+}
+
+
+static void dyad_selectAdd(dyad_SelectSet *s, int set, int fd) {
+#ifdef _WIN32
+  fd_set *f;
+  if (s->capacity == 0) dyad_selectGrow(s);
+  while ((unsigned) (s->capacity * FD_SETSIZE) < s->fds[set]->fd_count + 1) {
+    dyad_selectGrow(s);
+  }
+  f = s->fds[set];
+  f->fd_array[f->fd_count++] = (SOCKET) fd;
 #else
   unsigned *p;
-  while (fds->vec.length * FD_SETSIZE <= fd) {
-    dyad_fdsGrow(fds);
+  while (s->capacity * FD_SETSIZE < fd) {
+    dyad_selectGrow(s);
   }
-  p = (unsigned*) fds->vec.data;
+  p = (unsigned*) s->fds[set];
   p[fd / DYAD_UNSIGNED_BIT] |= 1 << (fd % DYAD_UNSIGNED_BIT);
+  if (fd > s->maxfd) s->maxfd = fd;
 #endif
 }
 
 
-static int dyad_fdsIsSet(dyad_FdSet *fds, int fd) {
+static int dyad_selectHas(dyad_SelectSet *s, int set, int fd) {
 #ifdef _WIN32
-  fd_set *s = fds->vec.data;
   unsigned i;
-  if (!s) return 0;
-  for (i = 0; i < s->fd_count; i++) {
-    if (s->fd_array[i] == (SOCKET) fd) {
+  fd_set *f;
+  if (s->capacity == 0) return 0;
+  f = s->fds[set];
+  for (i = 0; i < f->fd_count; i++) {
+    if (f->fd_array[i] == (SOCKET) fd) {
       return 1;
     }
   }
   return 0;
 #else
   unsigned *p;
-  if (fds->vec.length * FD_SETSIZE <= fd) return 0;
-  p = (unsigned*) fds->vec.data;
+  if (s->maxfd < fd) return 0;
+  p = (unsigned*) s->fds[set];
   return p[fd / DYAD_UNSIGNED_BIT] & (1 << (fd % DYAD_UNSIGNED_BIT));
 #endif
 }
@@ -265,9 +285,7 @@ static dyad_Stream *dyad_streams;
 static int dyad_streamCount;
 static char dyad_panicMsgBuffer[128];
 static dyad_PanicCallback dyad_panicCallback;
-static dyad_FdSet dyad_readSet;
-static dyad_FdSet dyad_writeSet;
-static dyad_FdSet dyad_exceptSet;
+static dyad_SelectSet dyad_selectSet;
 static double dyad_updateTimeout = 1;
 static double dyad_tickInterval = 1;
 static double dyad_lastTick = 0;
@@ -631,7 +649,6 @@ static int dyad_flushWriteBuffer(dyad_Stream *stream) {
 /*---------------------------------------------------------------------------*/
 
 void dyad_update(void) {
-  int maxfd; 
   dyad_Stream *stream;
   struct timeval tv;
 
@@ -639,35 +656,31 @@ void dyad_update(void) {
   dyad_updateTickTimer();
   dyad_updateStreamTimeouts();
 
-  /* Create fd sets for select */
-  dyad_fdsZero(&dyad_readSet);
-  dyad_fdsZero(&dyad_writeSet);
-  dyad_fdsZero(&dyad_exceptSet);
+  /* Create fd sets for select() */
+  dyad_selectZero(&dyad_selectSet);
 
   stream = dyad_streams;
-  maxfd = 0;
   while (stream) {
     switch (stream->state) {
       case DYAD_STATE_CONNECTED:
-        dyad_fdsSet(&dyad_readSet, stream->sockfd);
+        dyad_selectAdd(&dyad_selectSet, DYAD_SET_READ, stream->sockfd);
         if (!(stream->flags & DYAD_FLAG_READY) ||
             stream->writeBuffer.length != 0
         ) {
-          dyad_fdsSet(&dyad_writeSet, stream->sockfd);
+          dyad_selectAdd(&dyad_selectSet, DYAD_SET_WRITE, stream->sockfd);
         }
         break;
       case DYAD_STATE_CLOSING:
-        dyad_fdsSet(&dyad_writeSet, stream->sockfd);
+        dyad_selectAdd(&dyad_selectSet, DYAD_SET_WRITE, stream->sockfd);
         break;
       case DYAD_STATE_CONNECTING:
-        dyad_fdsSet(&dyad_writeSet, stream->sockfd);
-        dyad_fdsSet(&dyad_exceptSet, stream->sockfd);
+        dyad_selectAdd(&dyad_selectSet, DYAD_SET_WRITE, stream->sockfd);
+        dyad_selectAdd(&dyad_selectSet, DYAD_SET_EXCEPT, stream->sockfd);
         break;
       case DYAD_STATE_LISTENING:
-        dyad_fdsSet(&dyad_readSet, stream->sockfd);
+        dyad_selectAdd(&dyad_selectSet, DYAD_SET_READ, stream->sockfd);
         break;
     }
-    if (stream->sockfd > maxfd) maxfd = stream->sockfd;
     stream = stream->next;
   }
 
@@ -675,10 +688,10 @@ void dyad_update(void) {
   tv.tv_sec = dyad_updateTimeout;
   tv.tv_usec = (dyad_updateTimeout - tv.tv_sec) * 1e6;
 
-  select(maxfd + 1,
-         dyad_fdsGetFdSet(&dyad_readSet),
-         dyad_fdsGetFdSet(&dyad_writeSet),
-         dyad_fdsGetFdSet(&dyad_exceptSet),
+  select(dyad_selectSet.maxfd + 1,
+         dyad_selectSet.fds[DYAD_SET_READ],
+         dyad_selectSet.fds[DYAD_SET_WRITE],
+         dyad_selectSet.fds[DYAD_SET_EXCEPT],
          &tv);
 
   /* Handle streams */
@@ -687,7 +700,7 @@ void dyad_update(void) {
     switch (stream->state) {
 
       case DYAD_STATE_CONNECTED:
-        if (dyad_fdsIsSet(&dyad_readSet, stream->sockfd)) {
+        if (dyad_selectHas(&dyad_selectSet, DYAD_SET_READ, stream->sockfd)) {
           dyad_handleReceivedData(stream);
           if (stream->state == DYAD_STATE_CLOSED) {
             break;
@@ -696,20 +709,20 @@ void dyad_update(void) {
         /* Fall through */
 
       case DYAD_STATE_CLOSING:
-        if (dyad_fdsIsSet(&dyad_writeSet, stream->sockfd)) {
+        if (dyad_selectHas(&dyad_selectSet, DYAD_SET_WRITE, stream->sockfd)) {
           dyad_flushWriteBuffer(stream);
         }
         break;
 
       case DYAD_STATE_CONNECTING:
-        if (dyad_fdsIsSet(&dyad_writeSet, stream->sockfd)) {
+        if (dyad_selectHas(&dyad_selectSet, DYAD_SET_WRITE, stream->sockfd)) {
           /* Check socket for error */
           int optval = 0;
           socklen_t optlen = sizeof(optval);
           dyad_Event e;
           getsockopt(stream->sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen);
           if (optval != 0) goto connectFailed;
-          /* Handle successful connection */
+          /* Handle succeselful connection */
           stream->state = DYAD_STATE_CONNECTED;
           stream->lastActivity = dyad_getTime();
           dyad_initAddress(stream);
@@ -717,7 +730,9 @@ void dyad_update(void) {
           e = dyad_createEvent(DYAD_EVENT_CONNECT);
           e.msg = "connected to server";
           dyad_emitEvent(stream, &e);
-        } else if (dyad_fdsIsSet(&dyad_exceptSet, stream->sockfd)) {
+        } else if (
+          dyad_selectHas(&dyad_selectSet, DYAD_SET_EXCEPT, stream->sockfd)
+        ) {
           /* Handle failed connection */
           connectFailed:
           dyad_streamError(stream, "could not connect to server");
@@ -725,7 +740,7 @@ void dyad_update(void) {
         break;
 
       case DYAD_STATE_LISTENING:
-        if (dyad_fdsIsSet(&dyad_readSet, stream->sockfd)) {
+        if (dyad_selectHas(&dyad_selectSet, DYAD_SET_READ, stream->sockfd)) {
           dyad_acceptPendingConnections(stream);
         }
         break;
@@ -765,13 +780,7 @@ void dyad_shutdown(void) {
     dyad_destroyStream(dyad_streams);
   }
   /* Clear up everything */
-  dyad_fdsDeinit(&dyad_readSet);
-  dyad_fdsDeinit(&dyad_writeSet);
-  dyad_fdsDeinit(&dyad_exceptSet);
-  /* Reset state */
-  memset(&dyad_readSet, 0, sizeof(dyad_readSet));
-  memset(&dyad_writeSet, 0, sizeof(dyad_writeSet));
-  memset(&dyad_exceptSet, 0, sizeof(dyad_exceptSet));
+  dyad_selectDeinit(&dyad_selectSet);
 #ifdef _WIN32
   WSACleanup();
 #endif

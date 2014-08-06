@@ -424,9 +424,15 @@ static void dyad_emitEvent(dyad_Stream *stream, dyad_Event *e) {
 }
 
 
-static void dyad_streamError(dyad_Stream *stream, const char *msg) {
+static void dyad_streamError(dyad_Stream *stream, const char *msg, int err) {
+  char buf[256];
   dyad_Event e = dyad_createEvent(DYAD_EVENT_ERROR);
-  e.msg = msg;
+  if (err) {
+    sprintf(buf, "%s (%s)", msg, strerror(err));
+    e.msg = buf;
+  } else {
+    e.msg = msg;
+  }
   dyad_emitEvent(stream, &e);
   dyad_close(stream);
 }
@@ -476,7 +482,7 @@ static int dyad_initSocket(
 ) {
   stream->sockfd = socket(domain, type, protocol);
   if (stream->sockfd == -1) {
-    dyad_streamError(stream, "could not create socket"); 
+    dyad_streamError(stream, "could not create socket", errno); 
     return -1;
   }
   dyad_setSocket(stream, stream->sockfd);
@@ -570,12 +576,16 @@ static void dyad_handleReceivedData(dyad_Stream *stream) {
 
 static void dyad_acceptPendingConnections(dyad_Stream *stream) {
   for (;;) {
-    int sockfd = accept(stream->sockfd, NULL, NULL);
     dyad_Stream *remote;
     dyad_Event e;
-    if (sockfd == -1 && errno == EWOULDBLOCK) {
-      /* No more waiting sockets */
-      return;
+    int err = 0;
+    int sockfd = accept(stream->sockfd, NULL, NULL);
+    if (sockfd == -1) {
+      err = errno;
+      if (err == EWOULDBLOCK) {
+        /* No more waiting sockets */
+        return;
+      }
     }
     /* Create client stream */
     remote = dyad_newStream();
@@ -590,7 +600,7 @@ static void dyad_acceptPendingConnections(dyad_Stream *stream) {
     /* Handle invalid socket -- the stream is still made and the ACCEPT event
      * is still emitted, but its shut immediately with an error */
     if (remote->sockfd == -1) {
-      dyad_streamError(remote, "failed to create socket on accept");
+      dyad_streamError(remote, "failed to create socket on accept", err);
       return;
     }
   }
@@ -738,7 +748,7 @@ void dyad_update(void) {
         ) {
           /* Handle failed connection */
           connectFailed:
-          dyad_streamError(stream, "could not connect to server");
+          dyad_streamError(stream, "could not connect to server", 0);
         }
         break;
 
@@ -910,7 +920,7 @@ int dyad_listenEx(
   hints.ai_flags = AI_PASSIVE;
   err = getaddrinfo(host, dyad_intToStr(port), &hints, &ai);
   if (err) {
-    dyad_streamError(stream, "could not get addrinfo"); 
+    dyad_streamError(stream, "could not get addrinfo", errno); 
     goto fail;
   }
   /* Init socket */
@@ -925,12 +935,12 @@ int dyad_listenEx(
   /* Bind and listen */
   err = bind(stream->sockfd, ai->ai_addr, ai->ai_addrlen);
   if (err) {
-    dyad_streamError(stream, "could not bind socket");
+    dyad_streamError(stream, "could not bind socket", errno);
     goto fail;
   }
   err = listen(stream->sockfd, backlog);
   if (err) {
-    dyad_streamError(stream, "socket failed on listen");
+    dyad_streamError(stream, "socket failed on listen", errno);
     goto fail;
   }
   stream->state = DYAD_STATE_LISTENING;
@@ -962,7 +972,7 @@ int dyad_connect(dyad_Stream *stream, const char *host, int port) {
   hints.ai_socktype = SOCK_STREAM;
   err = getaddrinfo(host, dyad_intToStr(port), &hints, &ai);
   if (err) {
-    dyad_streamError(stream, "could not resolve host");
+    dyad_streamError(stream, "could not resolve host", errno);
     goto fail;
   }
   /* Start connecting */

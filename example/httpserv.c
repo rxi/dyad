@@ -23,10 +23,7 @@ static void onLine(dyad_Event *e) {
       /* Handle good request */
       FILE *fp = fopen(path + 1, "rb");
       if (fp) {
-        int c;
-        while ((c = fgetc(fp)) != EOF) {
-          dyad_write(e->stream, &c, 1);
-        }
+        dyad_writef(e->stream, "%r", fp);
         fclose(fp);
       } else {
         dyad_writef(e->stream, "not found '%s'\n", path);

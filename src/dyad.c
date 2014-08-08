@@ -886,6 +886,11 @@ void dyad_close(dyad_Stream *stream) {
   dyad_Event e;
   if (stream->state == DYAD_STATE_CLOSED) return;
   stream->state = DYAD_STATE_CLOSED;
+  /* Close socket */
+  if (stream->sockfd != -1) {
+    close(stream->sockfd);
+    stream->sockfd = -1;
+  }
   /* Emit event */
   e = dyad_createEvent(DYAD_EVENT_CLOSE);
   e.msg = "stream closed";

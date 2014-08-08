@@ -972,7 +972,7 @@ int dyad_connect(dyad_Stream *stream, const char *host, int port) {
   hints.ai_socktype = SOCK_STREAM;
   err = getaddrinfo(host, dyad_intToStr(port), &hints, &ai);
   if (err) {
-    dyad_streamError(stream, "could not resolve host", errno);
+    dyad_streamError(stream, "could not resolve host", 0);
     goto fail;
   }
   /* Start connecting */

@@ -77,8 +77,11 @@ null terminated string use `dyad_writef()` instead.
 Writes a formatted string to the `stream`. The function is similar to
 `sprintf()` with the following differences:
 * Dyad takes care of allocating enough memory for the result.
-* There are no flags, widths or precisions; only the following specifiers are
-  supported: `%%` `%s` `%f` `%g` `%d` `%i` `%c` `%x` `%X` `%p`.
+* There are no flags, widths or precisions; only the following standard
+  specifiers are supported: `%%` `%s` `%f` `%g` `%d` `%i` `%c` `%x` `%X` `%p`.
+* The `%r` specifier is also provided, this takes a FILE* argument
+  and writes the contents of the file until the EOF is reached.
+
 
 #### void dyad\_vwritef(dyad\_Stream stream, const char \*fmt, va\_list args)
 `dyad_vwritef()` is to `dyad_writef()` what `vsprintf()` is to `sprintf()`.

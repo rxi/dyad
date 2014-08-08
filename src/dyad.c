@@ -1002,6 +1002,8 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
   char buf[64];
   char *str;
   char f[] = "%_";
+  FILE *fp;
+  int c;
   while (*fmt) {
     if (*fmt == '%') {
       fmt++;
@@ -1011,6 +1013,12 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
           vsprintf(buf, (const char*) f, args);
           str = buf;
           goto writeStr;
+        case 'r':
+          fp = va_arg(args, FILE*);
+          while ((c = fgetc(fp)) != EOF) {
+            dyad_vectorPush(&stream->writeBuffer, c);
+          }
+          break;
         case 'c':
           dyad_vectorPush(&stream->writeBuffer, va_arg(args, int));
           break;

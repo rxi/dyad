@@ -1,5 +1,5 @@
 
-![Header Image](https://cloud.githubusercontent.com/assets/3920290/3791159/d5ebd230-1b2b-11e4-89fd-8650d7a60442.png)
+![dyad.c](https://cloud.githubusercontent.com/assets/3920290/3942261/5de470e4-255d-11e4-95a9-5f97fa9f3a57.png)
 
 ## Overview
 Dyad.c is an asynchronous networking library which aims to be lightweight,

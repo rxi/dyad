@@ -24,7 +24,7 @@ we no longer need dyad.
 
 #### double dyad\_getTime(void)
 Returns the current time in seconds. This time should only be used for
-comparisons, as no specific epoch is guranteed.
+comparisons, as no specific epoch is guaranteed.
 
 #### int dyad\_getStreamCount(void) 
 Returns the number of currently active streams.
@@ -77,10 +77,10 @@ null terminated string use `dyad_writef()` instead.
 Writes a formatted string to the `stream`. The function is similar to
 `sprintf()` with the following differences:
 * Dyad takes care of allocating enough memory for the result.
-* There are no flags, widths or precisions; only the following standard
+* There are no flags, widths or precisions; only the following *standard*
   specifiers are supported: `%%` `%s` `%f` `%g` `%d` `%i` `%c` `%x` `%X` `%p`.
-* The `%r` specifier is also provided, this takes a FILE* argument
-  and writes the contents of the file until the EOF is reached.
+* The `%r` specifier is provided, this takes a `FILE*` argument
+  and writes the contents until the EOF is reached.
 
 
 #### void dyad\_vwritef(dyad\_Stream stream, const char \*fmt, va\_list args)
@@ -91,7 +91,7 @@ Finishes sending any data the `stream` has left in its write buffer then closes
 the stream. The stream will stop receiving data once this function is called.
 
 #### void dyad\_close(dyad\_Stream \*stream)
-Immediately closes the `stream`, discarding any data left in it's write buffer.
+Immediately closes the `stream`, discarding any data left in its write buffer.
 
 #### void dyad\_setTimeout(dyad\_Stream \*stream, double seconds)
 Sets the number of seconds the `stream` can go without any activity before it
@@ -103,7 +103,7 @@ If `opt` is `1` then Nagle's algorithm is disabled for the stream's socket,
 `0` enables it; by default it is enabled.
 
 #### int dyad\_getState(dyad\_Stream \*stream)
-Returns the current state of the stream, for example a connected stream would
+Returns the current state of the `stream`, for example a connected stream would
 return the value `DYAD_STATE_CONNECTED`. See [States](#states).
 
 #### const char \*dyad\_getAddress(dyad\_Stream \*stream)
@@ -140,8 +140,9 @@ Emitted when a listening stream begins listening.
 Emitted when a connecting socket successfully makes the connection to its host.
 
 #### DYAD\_EVENT\_CLOSE
-Emitted when a socket is closed. Once the listener for this event has returned
-the associated stream's pointer can no longer assumed to be valid.
+Emitted when a socket is closed. Once all the listeners for this event have
+returned then the associated stream's pointer should no longer be considered
+valid.
 
 #### DYAD\_EVENT\_READY
 Emitted once each time the stream becomes ready to send more data. This event
@@ -178,7 +179,7 @@ stream at a constant interval; this interval can be set using
 
 #### DYAD\_STATE\_CLOSED
 The stream is closed. Streams are created in this state, and, if left in this
-state, are destroyed by dyad.
+state, are destroyed automatically.
 
 #### DYAD\_STATE\_CLOSING
 The stream is connected but still has data in its write buffer thats waiting to
@@ -188,7 +189,7 @@ be sent before it closes.
 The stream is attempting to connect to a host.
 
 #### DYAD\_STATE\_CONNECTED
-The stream is connected to a server or client.
+The stream is connected and can send or receive data.
 
 #### DYAD\_STATE\_LISTENING
 The stream is currently listening for connections to accept.
@@ -213,6 +214,9 @@ dyad\_Stream \*remote | The client stream when a connection is accepted
 const char \*msg      | A description of the event or error message
 char \*data           | The events associated data
 int size              | The size in bytes of the event's associated data
+
+A `dyad_Event` object nor any of its associated data should ever be modified by
+an event callback function.
 
 #### dyad\_Callback
 An event listener callback function which can be passed to

@@ -22,6 +22,9 @@ Emits the `DYAD_EVENT_CLOSE` event on all current streams then shuts down and
 clears up everything. This should be called at the end of the program or when
 we no longer need dyad.
 
+#### const char *dyad\_getVersion(void)
+Returns the version of the library as a string.
+
 #### double dyad\_getTime(void)
 Returns the current time in seconds. This time should only be used for
 comparisons, as no specific epoch is guaranteed.

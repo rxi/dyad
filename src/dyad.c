@@ -428,7 +428,7 @@ static void dyad_streamError(dyad_Stream *stream, const char *msg, int err) {
   char buf[256];
   dyad_Event e = dyad_createEvent(DYAD_EVENT_ERROR);
   if (err) {
-    sprintf(buf, "%s (%s)", msg, strerror(err));
+    sprintf(buf, "%.160s (%.80s)", msg, strerror(err));
     e.msg = buf;
   } else {
     e.msg = msg;

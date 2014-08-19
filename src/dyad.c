@@ -75,7 +75,7 @@ static void dyad_panic(const char *fmt, ...);
 
 static void *dyad_realloc(void *ptr, int n) {
   ptr = realloc(ptr, n);
-  if (!ptr) {
+  if (!ptr && n != 0) {
     dyad_panic("out of memory");
   }
   return ptr;

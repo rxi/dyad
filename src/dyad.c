@@ -61,7 +61,7 @@
       memcpy(&addr.sai.sin_addr, src, sizeof(addr.sai.sin_addr));
     }
     res = WSAAddressToString(&addr.sa, sizeof(addr), 0, dst, (LPDWORD) &size);
-    if (res != 0) return NULL;
+    if (res) return NULL;
     return dst;
   }
 #endif
@@ -75,7 +75,7 @@ static void dyad_panic(const char *fmt, ...);
 
 static void *dyad_realloc(void *ptr, int n) {
   ptr = realloc(ptr, n);
-  if (!ptr && n != 0) {
+  if (!ptr && n) {
     dyad_panic("out of memory");
   }
   return ptr;
@@ -657,7 +657,7 @@ void dyad_update(void) {
       case DYAD_STATE_CONNECTED:
         dyad_selectAdd(&dyad_selectSet, DYAD_SET_READ, stream->sockfd);
         if (!(stream->flags & DYAD_FLAG_READY) ||
-            stream->writeBuffer.length != 0
+            stream->writeBuffer.length
         ) {
           dyad_selectAdd(&dyad_selectSet, DYAD_SET_WRITE, stream->sockfd);
         }
@@ -714,7 +714,7 @@ void dyad_update(void) {
           int optval = 0;
           socklen_t optlen = sizeof(optval);
           getsockopt(stream->sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen);
-          if (optval != 0) goto connectFailed;
+          if (optval) goto connectFailed;
           /* Handle succeselful connection */
           stream->state = DYAD_STATE_CONNECTED;
           stream->lastActivity = dyad_getTime();

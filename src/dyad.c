@@ -84,6 +84,7 @@ static void *dyad_realloc(void *ptr, int n) {
 
 static void dyad_free(void *ptr) {
   free(ptr);
+  ptr = NULL;
 }
 
 

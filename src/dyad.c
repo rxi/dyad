@@ -465,7 +465,9 @@ static void dyad_setSocketNonBlocking(dyad_Stream *stream, int opt) {
   u_long mode = opt;
   ioctlsocket(stream->sockfd, FIONBIO, &mode);
 #else
-  fcntl(stream->sockfd, F_SETFL, opt ? O_NONBLOCK : ~O_NONBLOCK);
+  int flags = fcntl(stream->sockfd, F_GETFL);
+  fcntl(stream->sockfd, F_SETFL,
+        opt ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK));
 #endif
 }
 

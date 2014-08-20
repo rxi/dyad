@@ -519,15 +519,15 @@ static void dyad_handleReceivedData(dyad_Stream *stream) {
       }
     }
     data[size] = 0;
+    /* Update status */
+    stream->bytesReceived += size;
+    stream->lastActivity = dyad_getTime();
     /* Emit data event */
     e = dyad_createEvent(DYAD_EVENT_DATA);
     e.msg = "received data";
     e.data = data;
     e.size = size;
     dyad_emitEvent(stream, &e);
-    /* Update status */
-    stream->bytesReceived += size;
-    stream->lastActivity = dyad_getTime();
     /* Check stream state in case it was closed during one of the data event
      * handlers. */
     if (stream->state != DYAD_STATE_CONNECTED) {

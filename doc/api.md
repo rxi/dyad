@@ -47,9 +47,10 @@ recover from. The old atPanic function is returned or `NULL` if none was set.
 ---
 
 #### dyad\_Stream* dyad\_newStream(void)
-Creates and returns a new stream. Dyad handles the resources allocated for a
-stream once it is created; closed streams are automatically destroyed in the
-`dyad_update()` function.
+Creates and returns a new stream. The returned stream is in a closed state by
+default, `dyad_listen()`, `dyad_listenEx()` or `dyad_connect()` should be
+called on the stream to take it out of the closed state. See
+[dyad\_Stream](#dyad_stream).
 
 #### int dyad\_listen(dyad\_Stream \*stream, int port)
 Makes the `stream` begin listening on the given `port` on all local interfaces.
@@ -201,7 +202,9 @@ The stream is currently listening for connections to accept.
 ## Types
 
 #### dyad\_Stream
-A stream created with `dyad_newStream()` or by a listening server.
+A stream created with `dyad_newStream()` or by a listening server when it
+accepts a connection. Dyad handles the resources allocated for all streams;
+closed streams are automatically destroyed by the `dyad_update()` function.
 
 #### dyad\_Event
 Contains an event's information, a pointer of which is passed to a
@@ -218,8 +221,8 @@ const char \*msg      | A description of the event or error message
 char \*data           | The events associated data
 int size              | The size in bytes of the event's associated data
 
-A `dyad_Event` object nor any of its associated data should ever be modified by
-an event callback function.
+The `dyad_Event` struct and the data pointed to by its `data` field should
+never be modified by an event callback.
 
 #### dyad\_Callback
 An event listener callback function which can be passed to

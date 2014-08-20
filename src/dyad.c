@@ -179,8 +179,7 @@ typedef struct {
 
 
 static void dyad_selectDeinit(dyad_SelectSet *s) {
-  int i;
-  for (i = 0; i < DYAD_SET_MAX; i++) {
+  for (int i = 0; i < DYAD_SET_MAX; i++) {
     dyad_free(s->fds[i]);
     s->fds[i] = NULL;
   }
@@ -189,10 +188,9 @@ static void dyad_selectDeinit(dyad_SelectSet *s) {
 
 
 static void dyad_selectGrow(dyad_SelectSet *s) {
-  int i;
   int oldCapacity = s->capacity;
   s->capacity = s->capacity ? s->capacity << 1 : 1;
-  for (i = 0; i < DYAD_SET_MAX; i++) {
+  for (int i = 0; i < DYAD_SET_MAX; i++) {
     s->fds[i] = dyad_realloc(s->fds[i], s->capacity * sizeof(fd_set));
     memset(s->fds[i] + oldCapacity, 0,
            (s->capacity - oldCapacity) * sizeof(fd_set));
@@ -201,10 +199,9 @@ static void dyad_selectGrow(dyad_SelectSet *s) {
 
 
 static void dyad_selectZero(dyad_SelectSet *s) {
-  int i;
   if (s->capacity == 0) return;
   s->maxfd = 0;
-  for (i = 0; i < DYAD_SET_MAX; i++) {
+  for (int i = 0; i < DYAD_SET_MAX; i++) {
 #if _WIN32
     s->fds[i]->fd_count = 0;
 #else
@@ -237,11 +234,10 @@ static void dyad_selectAdd(dyad_SelectSet *s, int set, int fd) {
 
 static int dyad_selectHas(dyad_SelectSet *s, int set, int fd) {
 #ifdef _WIN32
-  unsigned i;
   fd_set *f;
   if (s->capacity == 0) return 0;
   f = s->fds[set];
-  for (i = 0; i < f->fd_count; i++) {
+  for (size_t i = 0; i < f->fd_count; i++) {
     if (f->fd_array[i] == (SOCKET) fd) {
       return 1;
     }
@@ -409,7 +405,7 @@ static void dyad_destroyStream(dyad_Stream *stream) {
 static void dyad_emitEvent(dyad_Stream *stream, dyad_Event *e) {
   int i;
   e->stream = stream;
-  for (i = 0; i < stream->listeners.length; i++) {
+  for (int i = 0; i < stream->listeners.length; i++) {
     dyad_Listener *listener = &stream->listeners.data[i];
     if (listener->event == e->type) {
       e->udata = listener->udata;
@@ -491,8 +487,7 @@ static int dyad_initSocket(
 
 
 static int dyad_hasListenerForEvent(dyad_Stream *stream, int event) {
-  int i;
-  for (i = 0; i < stream->listeners.length; i++) {
+  for (int i = 0; i < stream->listeners.length; i++) {
     dyad_Listener *listener = &stream->listeners.data[i];
     if (listener->event == event) {
       return 1;
@@ -536,14 +531,12 @@ static void dyad_handleReceivedData(dyad_Stream *stream) {
 
     /* Handle line event */
     if (dyad_hasListenerForEvent(stream, DYAD_EVENT_LINE)) {
-      int i, start;
-      char *buf;
-      for (i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         dyad_vectorPush(&stream->lineBuffer, data[i]);
       }
-      start = 0;
-      buf = stream->lineBuffer.data;
-      for (i = 0; i < stream->lineBuffer.length; i++) {
+      int start = 0;
+      char *buf = stream->lineBuffer.data;
+      for (int i = 0; i < stream->lineBuffer.length; i++) {
         if (buf[i] == '\n') {
           dyad_Event e;
           buf[i] = '\0';

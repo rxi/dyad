@@ -133,6 +133,11 @@ Returns the socket used by the `stream`.
 
 ## Events
 
+#### DYAD\_EVENT\_DESTROY
+Emitted when a stream is destroyed. Once all the listeners for this event have
+returned then the associated stream's pointer should no longer be considered
+valid.
+
 #### DYAD\_EVENT\_ACCEPT
 Emitted when a listening stream accepts a connection. The `remote` field of the
 event represents the connected client's stream.
@@ -144,9 +149,8 @@ Emitted when a listening stream begins listening.
 Emitted when a connecting socket successfully makes the connection to its host.
 
 #### DYAD\_EVENT\_CLOSE
-Emitted when a socket is closed. Once all the listeners for this event have
-returned then the associated stream's pointer should no longer be considered
-valid.
+Emitted when a socket is closed. Closed streams are automatically destroyed by
+`dyad_update()`, see [DYAD\_EVENT\_DESTROY](#dyad_event_destroy)
 
 #### DYAD\_EVENT\_READY
 Emitted once each time the stream becomes ready to send more data. This event

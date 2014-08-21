@@ -98,9 +98,9 @@ the stream. The stream will stop receiving data once this function is called.
 Immediately closes the `stream`, discarding any data left in its write buffer.
 
 #### void dyad\_setTimeout(dyad\_Stream \*stream, double seconds)
-Sets the number of seconds the `stream` can go without any activity before it
-is automatically closed. If `0` seconds is set then the stream will never
-timeout, this is the default.
+Sets the number of seconds the `stream` can go without any activity (receiving
+or sending data) before it is automatically closed. If `0` seconds is set then
+the stream will never timeout, this is the default.
 
 #### void dyad\_setNoDelay(dyad\_Stream \*stream, int opt)
 If `opt` is `1` then Nagle's algorithm is disabled for the stream's socket,
@@ -146,10 +146,10 @@ event represents the connected client's stream.
 Emitted when a listening stream begins listening.
 
 #### DYAD\_EVENT\_CONNECT
-Emitted when a connecting socket successfully makes the connection to its host.
+Emitted when a connecting stream successfully makes the connection to its host.
 
 #### DYAD\_EVENT\_CLOSE
-Emitted when a socket is closed. Closed streams are automatically destroyed by
+Emitted when a stream is closed. Closed streams are automatically destroyed by
 `dyad_update()`, see [DYAD\_EVENT\_DESTROY](#dyad_event_destroy)
 
 #### DYAD\_EVENT\_READY

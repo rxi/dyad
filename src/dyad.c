@@ -385,11 +385,16 @@ static void dyad_updateStreamTimeouts(void) {
 /*===========================================================================*/
 
 static void dyad_destroyStream(dyad_Stream *stream) {
+  dyad_Event e;
   dyad_Stream **next;
   /* Close socket */
   if (stream->sockfd != -1) {
     close(stream->sockfd);
   }
+  /* Emit destroy event */
+  e = dyad_createEvent(DYAD_EVENT_DESTROY);
+  e.msg = "the stream has been destroyed";
+  dyad_emitEvent(stream, &e);
   /* Remove from list and decrement count */
   next = &dyad_streams;
   while (*next != stream) {

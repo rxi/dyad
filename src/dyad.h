@@ -29,6 +29,7 @@ typedef void (*dyad_PanicCallback)(const char*);
 
 enum {
   DYAD_EVENT_NULL,
+  DYAD_EVENT_DESTROY,
   DYAD_EVENT_ACCEPT,
   DYAD_EVENT_LISTEN,
   DYAD_EVENT_CONNECT,

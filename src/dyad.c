@@ -1033,7 +1033,7 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
         case 'c':
           dyad_vectorPush(&stream->writeBuffer, va_arg(args, int));
           break;
-        case 's': {
+        case 's':
           str = va_arg(args, char*);
           if (str == NULL) str = "(null)";
           writeStr:
@@ -1055,7 +1055,6 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
           }
           str = buf;
           goto writeStr;
-        }
       }
     } else {
       dyad_vectorPush(&stream->writeBuffer, *fmt);

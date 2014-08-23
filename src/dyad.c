@@ -1020,11 +1020,6 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
     if (*fmt == '%') {
       fmt++;
       switch (*fmt) {
-        case 'f': case 'g': case 'd': case 'i': case 'x': case 'X': case 'p':
-          f[1] = *fmt;
-          vsprintf(buf, (const char*) f, args);
-          str = buf;
-          goto writeStr;
         case 'r':
           fp = va_arg(args, FILE*);
           while ((c = fgetc(fp)) != EOF) {
@@ -1042,9 +1037,21 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
             dyad_vectorPush(&stream->writeBuffer, *str++);
           }
           break;
-        }
         default:
-          dyad_vectorPush(&stream->writeBuffer, *fmt);
+          f[1] = *fmt;
+          switch (*fmt) {
+            case 'f':
+            case 'g': sprintf(buf, f, va_arg(args, double));    break;
+            case 'd':
+            case 'i': sprintf(buf, f, va_arg(args, int));       break;
+            case 'x':
+            case 'X': sprintf(buf, f, va_arg(args, unsigned));  break;
+            case 'p': sprintf(buf, f, va_arg(args, void*));     break;
+            default : buf[0] = *fmt; buf[1] = '\0';
+          }
+          str = buf;
+          goto writeStr;
+        }
       }
     } else {
       dyad_vectorPush(&stream->writeBuffer, *fmt);

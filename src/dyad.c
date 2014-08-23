@@ -1022,6 +1022,10 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
       switch (*fmt) {
         case 'r':
           fp = va_arg(args, FILE*);
+          if (fp == NULL) {
+            str = "(null)";
+            goto writeStr;
+          }
           while ((c = fgetc(fp)) != EOF) {
             dyad_vectorPush(&stream->writeBuffer, c);
           }

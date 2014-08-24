@@ -73,6 +73,10 @@ were added. See [Events](#events).
 Removes an event listener which was added with the `dyad_addListener()`
 function.
 
+#### void dyad\_removeAllListeners(dyad\_Stream \*stream, int event)
+Removes all listeners for the given `event`. If `event` is `DYAD_EVENT_NULL`
+then all listeners for all events are removed.
+
 #### void dyad\_write(dyad\_Stream \*stream, void \*data, int size)
 Writes the `data` of the given `size` to the stream. If you want to send a
 null terminated string use `dyad_writef()` instead.

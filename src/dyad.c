@@ -889,6 +889,20 @@ void dyad_removeListener(
 }
 
 
+void dyad_removeAllListeners(dyad_Stream *stream, int event) {
+  if (event == DYAD_EVENT_NULL) {
+    dyad_vectorClear(&stream->listeners); 
+  } else {
+    int i = stream->listeners.length;
+    while (i--) {
+      if (stream->listeners.data[i].event == event) {
+        dyad_vectorSplice(&stream->listeners, i, 1);
+      }
+    }
+  }
+}
+
+
 void dyad_close(dyad_Stream *stream) {
   dyad_Event e;
   if (stream->state == DYAD_STATE_CLOSED) return;

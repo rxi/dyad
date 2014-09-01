@@ -89,6 +89,8 @@ Writes a formatted string to the `stream`. The function is similar to
   specifiers are supported: `%%` `%s` `%f` `%g` `%d` `%i` `%c` `%x` `%X` `%p`.
 * The `%r` specifier is provided, this takes a `FILE*` argument
   and writes the contents until the EOF is reached.
+* The `%b` specifier is provided, this takes a `void*` argument followed by an
+  `int` argument representing the number of bytes to be written.
 
 
 #### void dyad\_vwritef(dyad\_Stream stream, const char \*fmt, va\_list args)

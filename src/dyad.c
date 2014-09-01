@@ -1055,6 +1055,13 @@ void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
             dyad_vectorPush(&stream->writeBuffer, *str++);
           }
           break;
+        case 'b':
+          str = va_arg(args, char*);
+          c = va_arg(args, int);
+          while (c--) {
+            dyad_vectorPush(&stream->writeBuffer, *str++);
+          }
+          break;
         default:
           f[1] = *fmt;
           switch (*fmt) {

@@ -46,6 +46,40 @@ int main(void) {
 }
 ```
 
+## Client example
+A simple example program which connects to a
+[daytime](http://en.wikipedia.org/wiki/Daytime_Protocol) server and prints the
+response:
+```c
+#include <stdio.h>
+#include "dyad.h"
+
+static void onConnect(dyad_Event *e) {
+  printf("connected: %s\n", e->msg);
+}
+
+static void onData(dyad_Event *e) {
+  printf("%s", e->data);
+}
+
+int main(void) {
+  dyad_init();
+
+  dyad_Stream *s = dyad_newStream();
+  dyad_addListener(s, DYAD_EVENT_CONNECT, onConnect, NULL);
+  dyad_addListener(s, DYAD_EVENT_DATA,    onData,    NULL);
+  dyad_connect(s, "wolfnisttime.com", 13);
+
+  while (dyad_getStreamCount() > 0) {
+    dyad_update();
+  }
+  
+  dyad_shutdown();
+  return 0;
+}
+```
+
+
 ## License
 This library is free software; you can redistribute it and/or modify it under
 the terms of the MIT license. See [LICENSE](LICENSE) for details.

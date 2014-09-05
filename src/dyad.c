@@ -451,7 +451,9 @@ static void dyad_initAddress(dyad_Stream *stream) {
   size = sizeof(addr);
   dyad_free(stream->address);
   if (getpeername(stream->sockfd, &addr.sa, &size) == -1) {
-    return;
+    if (getsockname(stream->sockfd, &addr.sa, &size) == -1) {
+      return;
+    }
   }
   if (addr.sas.ss_family == AF_INET6) {
     stream->address = dyad_realloc(NULL, 46);

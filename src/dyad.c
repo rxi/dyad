@@ -973,6 +973,7 @@ int dyad_listenEx(
   }
   stream->state = DYAD_STATE_LISTENING;
   stream->port = port;
+  dyad_initAddress(stream);
   /* Emit listening event */
   e = dyad_createEvent(DYAD_EVENT_LISTEN);
   e.msg = "socket is listening";

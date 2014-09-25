@@ -450,6 +450,7 @@ static void dyad_initAddress(dyad_Stream *stream) {
   memset(&addr, 0, sizeof(addr));
   size = sizeof(addr);
   dyad_free(stream->address);
+  stream->address = NULL;
   if (getpeername(stream->sockfd, &addr.sa, &size) == -1) {
     if (getsockname(stream->sockfd, &addr.sa, &size) == -1) {
       return;

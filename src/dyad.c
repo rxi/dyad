@@ -456,12 +456,13 @@ static void dyad_initAddress(dyad_Stream *stream) {
     }
   }
   if (addr.sas.ss_family == AF_INET6) {
-    stream->address = dyad_realloc(NULL, 46);
-    inet_ntop(AF_INET6, &addr.sai6.sin6_addr, stream->address, 45);
+    stream->address = dyad_realloc(NULL, INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, &addr.sai6.sin6_addr, stream->address,
+              INET6_ADDRSTRLEN);
     stream->port = ntohs(addr.sai6.sin6_port);
   } else {
-    stream->address = dyad_realloc(NULL, 16);
-    inet_ntop(AF_INET, &addr.sai.sin_addr, stream->address, 15);
+    stream->address = dyad_realloc(NULL, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &addr.sai.sin_addr, stream->address, INET_ADDRSTRLEN);
     stream->port = ntohs(addr.sai.sin_port);
   }
 }

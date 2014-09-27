@@ -1030,7 +1030,7 @@ void dyad_write(dyad_Stream *stream, void *data, int size) {
 
 
 void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args) {
-  char buf[64];
+  char buf[512];
   char *str;
   char f[] = "%_";
   FILE *fp;

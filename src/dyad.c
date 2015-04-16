@@ -171,12 +171,12 @@ enum {
 typedef struct {
   int capacity, maxfd;
   fd_set *fds[SELECT_MAX];
-} dyad_SelectSet;
+} SelectSet;
 
 #define DYAD_UNSIGNED_BIT (sizeof(unsigned) * CHAR_BIT)
 
 
-static void select_deinit(dyad_SelectSet *s) {
+static void select_deinit(SelectSet *s) {
   int i;
   for (i = 0; i < SELECT_MAX; i++) {
     dyad_free(s->fds[i]);
@@ -186,7 +186,7 @@ static void select_deinit(dyad_SelectSet *s) {
 }
 
 
-static void select_grow(dyad_SelectSet *s) {
+static void select_grow(SelectSet *s) {
   int i;
   int oldCapacity = s->capacity;
   s->capacity = s->capacity ? s->capacity << 1 : 1;
@@ -198,7 +198,7 @@ static void select_grow(dyad_SelectSet *s) {
 }
 
 
-static void select_zero(dyad_SelectSet *s) {
+static void select_zero(SelectSet *s) {
   int i;
   if (s->capacity == 0) return;
   s->maxfd = 0;
@@ -212,7 +212,7 @@ static void select_zero(dyad_SelectSet *s) {
 }
 
 
-static void select_add(dyad_SelectSet *s, int set, int fd) {
+static void select_add(SelectSet *s, int set, int fd) {
 #ifdef _WIN32
   fd_set *f;
   if (s->capacity == 0) select_grow(s);
@@ -233,7 +233,7 @@ static void select_add(dyad_SelectSet *s, int set, int fd) {
 }
 
 
-static int select_has(dyad_SelectSet *s, int set, int fd) {
+static int select_has(SelectSet *s, int set, int fd) {
 #ifdef _WIN32
   unsigned i;
   fd_set *f;
@@ -286,7 +286,7 @@ static dyad_Stream *dyad_streams;
 static int dyad_streamCount;
 static char dyad_panicMsgBuffer[128];
 static dyad_PanicCallback panicCallback;
-static dyad_SelectSet dyad_selectSet;
+static SelectSet dyad_selectSet;
 static double dyad_updateTimeout = 1;
 static double dyad_tickInterval = 1;
 static double dyad_lastTick = 0;

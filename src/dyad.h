@@ -73,7 +73,7 @@ void dyad_removeListener(dyad_Stream *stream, int event,
 void dyad_removeAllListeners(dyad_Stream *stream, int event);
 void dyad_end(dyad_Stream *stream);
 void dyad_close(dyad_Stream *stream);
-void dyad_write(dyad_Stream *stream, void *data, int size);
+void dyad_write(dyad_Stream *stream, const void *data, int size);
 void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args);
 void dyad_writef(dyad_Stream *stream, const char *fmt, ...);
 void dyad_setTimeout(dyad_Stream *stream, double seconds);

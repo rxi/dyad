@@ -1020,8 +1020,8 @@ int dyad_connect(dyad_Stream *stream, const char *host, int port) {
 }
 
 
-void dyad_write(dyad_Stream *stream, void *data, int size) {
-  char *p = data;
+void dyad_write(dyad_Stream *stream, const void *data, int size) {
+  const char *p = data;
   while (size--) {
     dyad_vectorPush(&stream->writeBuffer, *p++);
   }

@@ -770,8 +770,9 @@ void dyad_update(void) {
 
     /* If data was just now written to the stream we should immediately try to
      * send it */
-    if (stream->flags & DYAD_FLAG_WRITTEN &&
-        stream->state != DYAD_STATE_CLOSED
+    if (
+      stream->flags & DYAD_FLAG_WRITTEN &&
+      stream->state != DYAD_STATE_CLOSED
     ) {
       stream_flushWriteBuffer(stream);
     }

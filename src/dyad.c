@@ -314,13 +314,6 @@ static dyad_Event createEvent(int type) {
 }
 
 
-static const char *intToStr(int x) {
-  static char buf[64];
-  sprintf(buf, "%d", x);
-  return buf;
-}
-
-
 static void stream_destroy(dyad_Stream *stream);
 
 static void destroyClosedStreams(void) {
@@ -940,6 +933,7 @@ int dyad_listenEx(
 ) {
   struct addrinfo hints, *ai = NULL;
   int err, optval;
+  char buf[64];
   dyad_Event e;
 
   /* Get addrinfo */
@@ -947,7 +941,8 @@ int dyad_listenEx(
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
-  err = getaddrinfo(host, intToStr(port), &hints, &ai);
+  sprintf(buf, "%d", port);
+  err = getaddrinfo(host, buf, &hints, &ai);
   if (err) {
     stream_error(stream, "could not get addrinfo", errno); 
     goto fail;
@@ -995,12 +990,14 @@ int dyad_listen(dyad_Stream *stream, int port) {
 int dyad_connect(dyad_Stream *stream, const char *host, int port) {
   struct addrinfo hints, *ai = NULL;
   int err;
+  char buf[64];
 
   /* Resolve host */
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
-  err = getaddrinfo(host, intToStr(port), &hints, &ai);
+  sprintf(buf, "%d", port);
+  err = getaddrinfo(host, buf, &hints, &ai);
   if (err) {
     stream_error(stream, "could not resolve host", 0);
     goto fail;

@@ -262,7 +262,7 @@ typedef struct {
   int event;
   dyad_Callback callback;
   void *udata;
-} dyad_Listener;
+} Listener;
 
 
 struct dyad_Stream {
@@ -272,7 +272,7 @@ struct dyad_Stream {
   int port;
   int bytesSent, bytesReceived;
   double lastActivity, timeout;
-  Vec(dyad_Listener) listeners;
+  Vec(Listener) listeners;
   Vec(char) lineBuffer;
   Vec(char) writeBuffer;
   dyad_Stream *next;
@@ -406,7 +406,7 @@ static void stream_emitEvent(dyad_Stream *stream, dyad_Event *e) {
   int i;
   e->stream = stream;
   for (i = 0; i < stream->listeners.length; i++) {
-    dyad_Listener *listener = &stream->listeners.data[i];
+    Listener *listener = &stream->listeners.data[i];
     if (listener->event == e->type) {
       e->udata = listener->udata;
       listener->callback(e);
@@ -495,7 +495,7 @@ static int stream_initSocket(
 static int stream_hasListenerForEvent(dyad_Stream *stream, int event) {
   int i;
   for (i = 0; i < stream->listeners.length; i++) {
-    dyad_Listener *listener = &stream->listeners.data[i];
+    Listener *listener = &stream->listeners.data[i];
     if (listener->event == event) {
       return 1;
     }
@@ -864,7 +864,7 @@ dyad_Stream *dyad_newStream(void) {
 void dyad_addListener(
   dyad_Stream *stream, int event, dyad_Callback callback, void *udata
 ) {
-  dyad_Listener listener;
+  Listener listener;
   listener.event = event;
   listener.callback = callback;
   listener.udata = udata;
@@ -877,7 +877,7 @@ void dyad_removeListener(
 ) {
   int i = stream->listeners.length;
   while (i--) {
-    dyad_Listener *x = &stream->listeners.data[i];
+    Listener *x = &stream->listeners.data[i];
     if (x->event == event && x->callback == callback && x->udata == udata) {
       vec_splice(&stream->listeners, i, 1);
     }

@@ -749,7 +749,7 @@ void dyad_update(void) {
           select_has(&dyad_selectSet, SELECT_EXCEPT, stream->sockfd)
         ) {
           /* Handle failed connection */
-          connectFailed:
+connectFailed:
           stream_error(stream, "could not connect to server", 0);
         }
         break;
@@ -1010,7 +1010,7 @@ int dyad_connect(dyad_Stream *stream, const char *host, int port) {
   stream->state = DYAD_STATE_CONNECTING;
   freeaddrinfo(ai);
   return 0;
-  fail:
+fail:
   if (ai) freeaddrinfo(ai);
   return -1;
 }

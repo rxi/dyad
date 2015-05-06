@@ -61,7 +61,7 @@
     } else {
       memcpy(&addr.sai.sin_addr, src, sizeof(addr.sai.sin_addr));
     }
-	res = WSAAddressToStringA(&addr.sa, sizeof(addr), 0, dst, (LPDWORD) &size);
+    res = WSAAddressToStringA(&addr.sa, sizeof(addr), 0, dst, (LPDWORD) &size);
     if (res != 0) return NULL;
     return dst;
   }

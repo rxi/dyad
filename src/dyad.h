@@ -1,5 +1,5 @@
 /** 
- * Copyright (c) 2014 rxi
+ * Copyright (c) 2015 rxi
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the MIT license. See LICENSE for details.
@@ -73,7 +73,7 @@ void dyad_removeListener(dyad_Stream *stream, int event,
 void dyad_removeAllListeners(dyad_Stream *stream, int event);
 void dyad_end(dyad_Stream *stream);
 void dyad_close(dyad_Stream *stream);
-void dyad_write(dyad_Stream *stream, void *data, int size);
+void dyad_write(dyad_Stream *stream, const void *data, int size);
 void dyad_vwritef(dyad_Stream *stream, const char *fmt, va_list args);
 void dyad_writef(dyad_Stream *stream, const char *fmt, ...);
 void dyad_setTimeout(dyad_Stream *stream, double seconds);

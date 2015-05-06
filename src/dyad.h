@@ -10,6 +10,10 @@
 
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct dyad_Stream;
 typedef struct dyad_Stream dyad_Stream;
 
@@ -84,5 +88,9 @@ int  dyad_getPort(dyad_Stream *stream);
 int  dyad_getBytesSent(dyad_Stream *stream);
 int  dyad_getBytesReceived(dyad_Stream *stream);
 int  dyad_getSocket(dyad_Stream *stream);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

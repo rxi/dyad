@@ -8,6 +8,7 @@
 #ifdef _WIN32
   #define _WIN32_WINNT 0x501
   #define _CRT_SECURE_NO_WARNINGS
+  #define _WINSOCK_DEPRECATED_NO_WARNINGS
   #include <winsock2.h>
   #include <ws2tcpip.h>
   #include <windows.h>
@@ -60,7 +61,7 @@
     } else {
       memcpy(&addr.sai.sin_addr, src, sizeof(addr.sai.sin_addr));
     }
-    res = WSAAddressToString(&addr.sa, sizeof(addr), 0, dst, (LPDWORD) &size);
+    res = WSAAddressToStringA(&addr.sa, sizeof(addr), 0, dst, (LPDWORD) &size);
     if (res != 0) return NULL;
     return dst;
   }

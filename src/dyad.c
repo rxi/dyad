@@ -269,7 +269,7 @@ typedef struct {
 
 struct dyad_Stream {
   int state, flags;
-  int sockfd;
+  dyad_Socket sockfd;
   char *address;
   int port;
   int bytesSent, bytesReceived;
@@ -474,7 +474,7 @@ static void stream_setSocketNonBlocking(dyad_Stream *stream, int opt) {
 }
 
 
-static void stream_setSocket(dyad_Stream *stream, int sockfd) {
+static void stream_setSocket(dyad_Stream *stream, dyad_Socket sockfd) {
   stream->sockfd = sockfd;
   stream_setSocketNonBlocking(stream, 1);
   stream_initAddress(stream);
@@ -583,7 +583,7 @@ static void stream_acceptPendingConnections(dyad_Stream *stream) {
     dyad_Stream *remote;
     dyad_Event e;
     int err = 0;
-    int sockfd = accept(stream->sockfd, NULL, NULL);
+    dyad_Socket sockfd = accept(stream->sockfd, NULL, NULL);
     if (sockfd == -1) {
       err = errno;
       if (err == EWOULDBLOCK) {
@@ -1142,6 +1142,6 @@ int dyad_getBytesReceived(dyad_Stream *stream) {
 }
 
 
-int dyad_getSocket(dyad_Stream *stream) {
+dyad_Socket dyad_getSocket(dyad_Stream *stream) {
   return stream->sockfd;
 }

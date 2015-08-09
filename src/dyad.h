@@ -10,8 +10,19 @@
 
 #include <stdarg.h>
 
+#ifdef _WIN32
+  #include <windows.h> /* For SOCKET */
+#endif
+
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if _WIN32
+typedef SOCKET dyad_Socket;
+#else
+typedef int dyad_Socket;
 #endif
 
 struct dyad_Stream;
@@ -26,7 +37,6 @@ typedef struct {
   char *data;
   int size;
 } dyad_Event;
-
 
 typedef void (*dyad_Callback)(dyad_Event*);
 typedef void (*dyad_PanicCallback)(const char*);
@@ -87,7 +97,7 @@ const char *dyad_getAddress(dyad_Stream *stream);
 int  dyad_getPort(dyad_Stream *stream);
 int  dyad_getBytesSent(dyad_Stream *stream);
 int  dyad_getBytesReceived(dyad_Stream *stream);
-int  dyad_getSocket(dyad_Stream *stream);
+dyad_Socket dyad_getSocket(dyad_Stream *stream);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -35,6 +35,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <limits.h>
+
 #include "dyad.h"
 
 #define DYAD_VERSION "0.2.0"
@@ -66,6 +67,10 @@
     if (res != 0) return NULL;
     return dst;
   }
+#endif
+
+#ifndef INVALID_SOCKET
+  #define INVALID_SOCKET -1
 #endif
 
 
@@ -381,7 +386,7 @@ static void stream_destroy(dyad_Stream *stream) {
   dyad_Event e;
   dyad_Stream **next;
   /* Close socket */
-  if (stream->sockfd != -1) {
+  if (stream->sockfd != INVALID_SOCKET) {
     close(stream->sockfd);
   }
   /* Emit destroy event */
@@ -485,7 +490,7 @@ static int stream_initSocket(
   dyad_Stream *stream, int domain, int type, int protocol
 ) {
   stream->sockfd = socket(domain, type, protocol);
-  if (stream->sockfd == -1) {
+  if (stream->sockfd == INVALID_SOCKET) {
     stream_error(stream, "could not create socket", errno); 
     return -1;
   }
@@ -584,7 +589,7 @@ static void stream_acceptPendingConnections(dyad_Stream *stream) {
     dyad_Event e;
     int err = 0;
     dyad_Socket sockfd = accept(stream->sockfd, NULL, NULL);
-    if (sockfd == -1) {
+    if (sockfd == INVALID_SOCKET) {
       err = errno;
       if (err == EWOULDBLOCK) {
         /* No more waiting sockets */
@@ -603,7 +608,7 @@ static void stream_acceptPendingConnections(dyad_Stream *stream) {
     stream_emitEvent(stream, &e);
     /* Handle invalid socket -- the stream is still made and the ACCEPT event
      * is still emitted, but its shut immediately with an error */
-    if (remote->sockfd == -1) {
+    if (remote->sockfd == INVALID_SOCKET) {
       stream_error(remote, "failed to create socket on accept", err);
       return;
     }
@@ -862,7 +867,7 @@ dyad_Stream *dyad_newStream(void) {
   dyad_Stream *stream = dyad_realloc(NULL, sizeof(*stream));
   memset(stream, 0, sizeof(*stream));
   stream->state = DYAD_STATE_CLOSED;
-  stream->sockfd = -1;
+  stream->sockfd = INVALID_SOCKET;
   stream->lastActivity = dyad_getTime();
   /* Add to list and increment count */
   stream->next = dyad_streams;
@@ -915,9 +920,9 @@ void dyad_close(dyad_Stream *stream) {
   if (stream->state == DYAD_STATE_CLOSED) return;
   stream->state = DYAD_STATE_CLOSED;
   /* Close socket */
-  if (stream->sockfd != -1) {
+  if (stream->sockfd != INVALID_SOCKET) {
     close(stream->sockfd);
-    stream->sockfd = -1;
+    stream->sockfd = INVALID_SOCKET;
   }
   /* Emit event */
   e = createEvent(DYAD_EVENT_CLOSE);

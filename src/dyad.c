@@ -176,7 +176,8 @@ enum {
 };
 
 typedef struct {
-  int capacity, maxfd;
+  int capacity;
+  dyad_Socket maxfd;
   fd_set *fds[SELECT_MAX];
 } SelectSet;
 
@@ -219,7 +220,7 @@ static void select_zero(SelectSet *s) {
 }
 
 
-static void select_add(SelectSet *s, int set, int fd) {
+static void select_add(SelectSet *s, int set, dyad_Socket fd) {
 #ifdef _WIN32
   fd_set *f;
   if (s->capacity == 0) select_grow(s);
@@ -227,7 +228,7 @@ static void select_add(SelectSet *s, int set, int fd) {
     select_grow(s);
   }
   f = s->fds[set];
-  f->fd_array[f->fd_count++] = (SOCKET) fd;
+  f->fd_array[f->fd_count++] = fd;
 #else
   unsigned *p;
   while (s->capacity * FD_SETSIZE < fd) {
@@ -240,14 +241,14 @@ static void select_add(SelectSet *s, int set, int fd) {
 }
 
 
-static int select_has(SelectSet *s, int set, int fd) {
+static int select_has(SelectSet *s, int set, dyad_Socket fd) {
 #ifdef _WIN32
   unsigned i;
   fd_set *f;
   if (s->capacity == 0) return 0;
   f = s->fds[set];
   for (i = 0; i < f->fd_count; i++) {
-    if (f->fd_array[i] == (SOCKET) fd) {
+    if (f->fd_array[i] == fd) {
       return 1;
     }
   }

@@ -133,7 +133,7 @@ Returns the number of bytes which have been sent by the `stream` since it was
 made. This does not include the data in the stream's write buffer which is
 still waiting to be sent.
 
-#### int dyad\_getSocket(dyad\_Stream \*stream)
+#### dyad_Socket dyad\_getSocket(dyad\_Stream \*stream)
 Returns the socket used by the `stream`.
 
 
@@ -210,6 +210,9 @@ The stream is currently listening for connections to accept.
 
 
 ## Types
+
+#### dyad\_Socket
+Represents a socket for the given platform.
 
 #### dyad\_Stream
 A stream created with `dyad_newStream()` or by a listening server when it

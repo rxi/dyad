@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "dyad.h"
 
-/* Conneccts to a daytime server and prints the response */
+/* Connects to a daytime server and prints the response */
 
 static void onConnect(dyad_Event *e) {
   printf("connected: %s\n", e->msg);

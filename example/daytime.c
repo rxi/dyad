@@ -24,7 +24,7 @@ int main(void) {
   dyad_addListener(s, DYAD_EVENT_CONNECT, onConnect, NULL);
   dyad_addListener(s, DYAD_EVENT_ERROR,   onError,   NULL);
   dyad_addListener(s, DYAD_EVENT_DATA,    onData,    NULL);
-  dyad_connect(s, "wolfnisttime.com", 13);
+  dyad_connect(s, "time-nw.nist.gov", 13);
 
   while (dyad_getStreamCount() > 0) {
     dyad_update();

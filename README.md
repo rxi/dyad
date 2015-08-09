@@ -68,7 +68,7 @@ int main(void) {
   dyad_Stream *s = dyad_newStream();
   dyad_addListener(s, DYAD_EVENT_CONNECT, onConnect, NULL);
   dyad_addListener(s, DYAD_EVENT_DATA,    onData,    NULL);
-  dyad_connect(s, "wolfnisttime.com", 13);
+  dyad_connect(s, "time-nw.nist.gov", 13);
 
   while (dyad_getStreamCount() > 0) {
     dyad_update();

@@ -45,6 +45,9 @@
   #define close(a) closesocket(a)
   #define getsockopt(a,b,c,d,e) getsockopt((a),(b),(c),(char*)(d),(e))
   #define setsockopt(a,b,c,d,e) setsockopt((a),(b),(c),(char*)(d),(e))
+  #define select(a,b,c,d,e) select((int)(a),(b),(c),(d),(e))
+  #define bind(a,b,c) bind((a),(b),(int)(c))
+  #define connect(a,b,c) connect((a),(b),(int)(c))
 
   #undef  errno
   #define errno WSAGetLastError()

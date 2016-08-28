@@ -38,7 +38,7 @@
 
 #include "dyad.h"
 
-#define DYAD_VERSION "0.2.0"
+#define DYAD_VERSION "0.2.1"
 
 
 #ifdef _WIN32

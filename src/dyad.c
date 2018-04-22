@@ -23,6 +23,7 @@
   #include <fcntl.h>
   #include <sys/types.h>
   #include <sys/socket.h>
+  #include <sys/un.h>
   #include <sys/time.h>
   #include <netinet/in.h>
   #include <netinet/tcp.h>
@@ -35,6 +36,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <limits.h>
+#include <stddef.h>
 
 #include "dyad.h"
 
@@ -1035,6 +1037,30 @@ fail:
   return -1;
 }
 
+int dyad_unix_connect(dyad_Stream *stream, const char *path) {
+  struct sockaddr_un hints;
+  size_t size;
+  int err;
+
+  /* Resolve host */
+  memset(&hints, 0, sizeof(hints));
+  hints.sun_family = AF_UNIX;
+  strncpy(hints.sun_path, path, (sizeof(hints.sun_path) - 1));
+  if (strcmp(hints.sun_path, path) != 0) {
+      stream_error(stream, "file path too long", 0);
+      goto fail;
+  }
+
+  /* Start connecting */
+  err = stream_initSocket(stream, hints.sun_family, SOCK_STREAM, 0);
+  if (err) goto fail;
+  size = (offsetof(struct sockaddr_un, sun_path) + strlen(hints.sun_path));
+  connect(stream->sockfd, (struct sockaddr *) &hints, size);
+  stream->state = DYAD_STATE_CONNECTING;
+  return 0;
+fail:
+  return -1;
+}
 
 void dyad_write(dyad_Stream *stream, const void *data, int size) {
   const char *p = data;

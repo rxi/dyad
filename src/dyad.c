@@ -1038,6 +1038,10 @@ fail:
 }
 
 int dyad_unix_connect(dyad_Stream *stream, const char *path) {
+#ifdef _WIN32
+  stream_error(stream, "dyad_unix_connect is not supported on Windows", 0);
+  goto fail;
+#else
   struct sockaddr_un hints;
   size_t size;
   int err;
@@ -1057,6 +1061,7 @@ int dyad_unix_connect(dyad_Stream *stream, const char *path) {
   size = (offsetof(struct sockaddr_un, sun_path) + strlen(hints.sun_path));
   connect(stream->sockfd, (struct sockaddr *) &hints, size);
   stream->state = DYAD_STATE_CONNECTING;
+#endif
   return 0;
 fail:
   return -1;

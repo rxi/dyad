@@ -18,6 +18,9 @@ class DyadConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+
     def configure_cmake(self):
         cmake = CMake(self)
         if self.settings.os != "Windows":

@@ -80,6 +80,7 @@ int  dyad_listen(dyad_Stream *stream, int port);
 int  dyad_listenEx(dyad_Stream *stream, const char *host, int port,
                    int backlog);
 int  dyad_connect(dyad_Stream *stream, const char *host, int port);
+int  dyad_unix_connect(dyad_Stream *stream, const char *path);
 void dyad_addListener(dyad_Stream *stream, int event,
                       dyad_Callback callback, void *udata);
 void dyad_removeListener(dyad_Stream *stream, int event,

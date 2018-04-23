@@ -29,14 +29,14 @@ Returns the version of the library as a string.
 Returns the current time in seconds. This time should only be used for
 comparisons, as no specific epoch is guaranteed.
 
-#### int dyad\_getStreamCount(void) 
+#### int dyad\_getStreamCount(void)
 Returns the number of currently active streams.
 
 #### void dyad\_setUpdateTimeout(double seconds)
 Sets the maximum number of seconds the `dyad_update()` function can block for.
 If `seconds` is `0` then `dyad_update()` will not block.
 
-#### void dyad\_setTickInterval(double seconds) 
+#### void dyad\_setTickInterval(double seconds)
 Sets the interval in seconds that the `DYAD_EVENT_TICK` event is emited to all
 streams; the default is 1 second.
 
@@ -62,6 +62,9 @@ Performs the same task as `dyad_listen()` but provides additional options:
 
 #### int dyad\_connect(dyad\_Stream \*stream, const char \*host, int port)
 Connects the `stream` to the remote `host`.
+
+#### int dyad\_unix\_connect(dyad\_Stream \*stream, const char \*path)
+Connects the `stream` to `unix` domain socket.
 
 #### void dyad\_addListener(dyad\_Stream \*stream, int event, dyad\_Callback callback, void \*udata)
 Adds a listener for the `event` to the `stream`. When the event occurs the
@@ -251,4 +254,3 @@ function should be of the following form:
 ```c
 void func(const char *message);
 ```
-

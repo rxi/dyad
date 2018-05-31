@@ -10,6 +10,8 @@ def command_format(cmd, var)
   return cmd
 end
 
+Dir.chdir __dir__
+
 data = File.read 'config.yml'
 config = YAML.load data, symbolize_names: true
 

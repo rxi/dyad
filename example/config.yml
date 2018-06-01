@@ -1,0 +1,15 @@
+compiler: clang
+
+source:   ../src
+include:  ../src
+bin:      ../bin
+
+cflags:
+  - 'O1'
+  - Wall
+  - std=c99
+  - -g
+
+dlibs:
+  - mswin32:
+    - ws2_32

@@ -757,7 +757,7 @@ void dyad_update(void) {
           dyad_Event e;
           getsockopt(stream->sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen);
           if (optval != 0) goto connectFailed;
-          /* Handle succeselful connection */
+          /* Handle successful connection */
           stream->state = DYAD_STATE_CONNECTED;
           stream->lastActivity = dyad_getTime();
           stream_initAddress(stream);
